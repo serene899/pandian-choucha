@@ -1,0 +1,1137 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>门店物料盘点抽查</title>
+<style>
+:root {
+color-scheme: light dark;
+--bg: #f3f4f3;
+--surface: #ffffff;
+--surface-2: #eceeed;
+--ink: #1d2422;
+--ink-2: #4c5652;
+--ink-3: #7d8782;
+--line: #dde1de;
+--accent: #6f4525;
+--accent-ink: #ffffff;
+--accent-soft: #f3e9df;
+--ok: #1e7d46;
+--ok-soft: #e2f2e7;
+--bad: #b3372c;
+--bad-soft: #fbe7e4;
+--warn-bg: #fdf3e0;
+--warn-ink: #7a5410;
+--radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+:root {
+--bg: #141615;
+--surface: #1e2120;
+--surface-2: #262a29;
+--ink: #eef1ef;
+--ink-2: #b9c1bd;
+--ink-3: #8a938e;
+--line: #333836;
+--accent: #d29a63;
+--accent-ink: #221607;
+--accent-soft: #33291d;
+--ok: #5cc583;
+--ok-soft: #1d3325;
+--bad: #f08a7d;
+--bad-soft: #3d2320;
+--warn-bg: #38300f;
+--warn-ink: #ecc97e;
+}
+}
+* { box-sizing: border-box;}
+html { -webkit-text-size-adjust: 100%;}
+body {
+margin: 0;
+background: var(--bg);
+color: var(--ink);
+font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", sans-serif;
+font-size: 16px;
+line-height: 1.55;
+}
+main {
+max-width: 680px;
+margin: 0 auto;
+padding: 20px 16px 48px;
+}
+h1 {
+font-size: 22px;
+line-height: 1.3;
+margin: 4px 0 6px;
+font-weight: 700;
+letter-spacing: 0;
+}
+.lede {
+margin: 0 0 20px;
+color: var(--ink-2);
+font-size: 14px;
+}
+section {
+background: var(--surface);
+border: 1px solid var(--line);
+border-radius: var(--radius);
+padding: 16px;
+margin-bottom: 14px;
+}
+.sec-head {
+display: flex;
+align-items: baseline;
+justify-content: space-between;
+gap: 12px;
+margin-bottom: 10px;
+}
+h2 {
+font-size: 16px;
+margin: 0;
+font-weight: 700;
+}
+.sec-note {
+font-size: 13px;
+color: var(--ink-3);
+white-space: nowrap;
+}
+label.field-label {
+display: block;
+font-size: 13px;
+color: var(--ink-2);
+margin-bottom: 6px;
+}
+textarea {
+width: 100%;
+min-height: 168px;
+resize: vertical;
+border: 1px solid var(--line);
+border-radius: 8px;
+background: var(--surface);
+color: var(--ink);
+font: inherit;
+font-size: 15px;
+line-height: 1.7;
+padding: 10px 12px;
+}
+textarea:focus, input:focus {
+outline: 2px solid var(--accent);
+outline-offset: 0;
+border-color: transparent;
+}
+textarea::placeholder, input::placeholder { color: var(--ink-3);}
+.btn-row {
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+margin-top: 12px;
+}
+button {
+font: inherit;
+cursor: pointer;
+border-radius: 8px;
+border: 1px solid var(--line);
+background: var(--surface);
+color: var(--ink);
+min-height: 44px;
+padding: 8px 16px;
+font-size: 15px;
+font-weight: 500;
+display: inline-flex;
+align-items: center;
+justify-content: center;
+gap: 7px;
+touch-action: manipulation;
+}
+button:active { opacity: 0.75;}
+button:disabled { opacity: 0.45; cursor: default;}
+button.primary {
+background: var(--accent);
+border-color: var(--accent);
+color: var(--accent-ink);
+font-weight: 600;
+}
+button.danger-armed {
+border-color: var(--bad);
+color: var(--bad);
+background: var(--bad-soft);
+}
+button svg { flex: none;}
+.draw-row {
+display: flex;
+gap: 10px;
+align-items: stretch;
+flex-wrap: wrap;
+}
+.count-box {
+display: flex;
+align-items: center;
+gap: 0;
+border: 1px solid var(--line);
+border-radius: 8px;
+overflow: hidden;
+flex: none;
+}
+.count-box button {
+border: 0;
+border-radius: 0;
+min-height: 46px;
+width: 44px;
+padding: 0;
+font-size: 20px;
+background: var(--surface-2);
+}
+.count-box input {
+width: 56px;
+min-height: 46px;
+border: 0;
+text-align: center;
+font: inherit;
+font-size: 17px;
+font-weight: 600;
+color: var(--ink);
+background: var(--surface);
+-moz-appearance: textfield;
+appearance: textfield;
+}
+.count-box input::-webkit-outer-spin-button,
+.count-box input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0;}
+.count-box input:focus { outline: none;}
+.count-wrap label {
+display: block;
+font-size: 13px;
+color: var(--ink-2);
+margin-bottom: 6px;
+}
+#drawBtn { flex: 1 1 180px; min-height: 46px; margin-top: 23px; font-size: 16px;}
+.hint {
+font-size: 13px;
+color: var(--ink-3);
+margin: 10px 0 0;
+}
+.msg {
+display: none;
+margin-top: 12px;
+padding: 10px 12px;
+border-radius: 8px;
+font-size: 14px;
+background: var(--warn-bg);
+color: var(--warn-ink);
+}
+.msg.show { display: block;}
+.spinner {
+width: 16px; height: 16px;
+border: 2px solid currentColor;
+border-top-color: transparent;
+border-radius: 50%;
+animation: spin 0.7s linear infinite;
+flex: none;
+}
+@keyframes spin { to { transform: rotate(360deg);}}
+@media (prefers-reduced-motion: reduce) {
+.spinner { animation: none;}
+}
+/* 结果区 */
+#resultSection { display: none;}
+#resultSection.show { display: block;}
+.summary-line {
+display: flex;
+flex-wrap: wrap;
+gap: 6px 14px;
+font-size: 14px;
+color: var(--ink-2);
+margin-bottom: 4px;
+}
+.summary-line b { color: var(--ink); font-weight: 600;}
+.summary-line.s-ok b { color: var(--ok);}
+.summary-line.s-bad b { color: var(--bad);}
+ol.results {
+list-style: none;
+margin: 8px 0 0;
+padding: 0;
+}
+ol.results li {
+padding: 12px 0;
+border-top: 1px solid var(--line);
+}
+ol.results li:first-child { border-top: 0;}
+.item-top {
+display: flex;
+align-items: flex-start;
+gap: 10px;
+}
+.item-idx {
+flex: none;
+width: 26px; height: 26px;
+border-radius: 50%;
+background: var(--surface-2);
+color: var(--ink-2);
+font-size: 13px;
+font-weight: 600;
+display: flex;
+align-items: center;
+justify-content: center;
+margin-top: 2px;
+}
+.item-name {
+flex: 1;
+font-size: 16px;
+font-weight: 600;
+word-break: break-all;
+padding-top: 2px;
+}
+.seg {
+flex: none;
+display: flex;
+border: 1px solid var(--line);
+border-radius: 8px;
+overflow: hidden;
+}
+.seg button {
+border: 0;
+border-radius: 0;
+min-height: 40px;
+padding: 6px 14px;
+font-size: 14px;
+background: var(--surface);
+color: var(--ink-2);
+}
+.seg button + button { border-left: 1px solid var(--line);}
+.seg button[aria-pressed="true"].seg-ok { background: var(--ok-soft); color: var(--ok); font-weight: 700;}
+.seg button[aria-pressed="true"].seg-bad { background: var(--bad-soft); color: var(--bad); font-weight: 700;}
+.item-note {
+width: 100%;
+margin-top: 8px;
+margin-left: 36px;
+width: calc(100% - 36px);
+min-height: 40px;
+border: 1px solid var(--line);
+border-radius: 8px;
+padding: 8px 10px;
+font: inherit;
+font-size: 14px;
+background: var(--surface);
+color: var(--ink);
+}
+.item-note.attn { border-color: var(--bad);}
+.result-actions {
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+margin-top: 14px;
+}
+#copyBtn { flex: 1 1 200px;}
+.empty-note {
+color: var(--ink-3);
+font-size: 14px;
+margin: 0;
+}
+.week-status {
+font-size: 14px;
+color: var(--ink-2);
+margin: 12px 0 0;
+}
+.week-status b { color: var(--ink); font-weight: 600;}
+.hist-group {
+padding: 10px 0;
+border-top: 1px solid var(--line);
+}
+.hist-group:first-child { border-top: 0; padding-top: 2px;}
+.hist-date {
+font-size: 14px;
+font-weight: 600;
+margin-bottom: 8px;
+}
+.hist-chips {
+display: flex;
+flex-wrap: wrap;
+gap: 6px;
+}
+.chip {
+font-size: 13px;
+background: var(--surface-2);
+color: var(--ink-2);
+border-radius: 999px;
+padding: 4px 10px;
+}
+.install-step {
+font-size: 14px;
+color: var(--ink-2);
+margin: 0 0 8px;
+}
+.install-step:last-child { margin-bottom: 0;}
+.install-step b { color: var(--ink);}
+.add-row { display: flex; gap: 8px; margin-top: 14px;}
+.add-row input {
+flex: 1; min-width: 0; min-height: 46px;
+border: 1px solid var(--line); border-radius: 8px;
+padding: 8px 12px; font: inherit; font-size: 15px;
+background: var(--surface); color: var(--ink);
+}
+.add-row button { flex: none; min-height: 46px;}
+.save-status {
+display: flex; align-items: center; gap: 7px;
+font-size: 13px; color: var(--ok); margin: 10px 0 0; font-weight: 500;
+}
+.save-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); flex: none;}
+.save-status.empty { color: var(--ink-3); font-weight: 400;}
+.save-status.empty .dot { background: var(--ink-3);}
+/* toast */
+#toast {
+position: fixed;
+left: 50%;
+bottom: calc(24px + env(safe-area-inset-bottom));
+transform: translateX(-50%) translateY(16px);
+background: var(--ink);
+color: var(--bg);
+font-size: 14px;
+padding: 10px 18px;
+border-radius: 999px;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.2s ease, transform 0.2s ease;
+max-width: calc(100vw - 32px);
+text-align: center;
+z-index: 50;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0);}
+@media (prefers-reduced-motion: reduce) {
+#toast { transition: none;}
+}
+@media (max-width: 420px) {
+#drawBtn { margin-top: 0; flex-basis: 100%; order: 3;}
+.draw-row { align-items: flex-end;}
+}
+</style>
+</head>
+<body>
+<main>
+<h1>门店物料盘点抽查</h1>
+<p class="lede">物料清单会自动保存在这台手机里，下次打开还在，不用每次重新粘贴。随机抽几项出来逐项核对，标好正常 / 异常后一键复制发给同事或主管。近 7 天抽过的项目不会再被抽到，一周内不重复。</p>
+
+<!-- 1. 清单 -->
+<section aria-labelledby="h-list">
+<div class="sec-head">
+<h2 id="h-list">1 · 物料清单</h2>
+<span class="sec-note" id="listCount">共 0 项</span>
+</div>
+<label class="field-label" for="listInput">一行一条物料名称，可直接粘贴整份清单（数量不限，几百、几千项都可以）</label>
+<textarea id="listInput" placeholder="例如：&#10;意式咖啡豆&#10;全脂牛奶&#10;燕麦奶&#10;白砂糖&#10;外带纸杯（大）&#10;……" spellcheck="false"></textarea>
+<p class="save-status empty" id="saveStatus"><span class="dot" aria-hidden="true"></span><span id="saveStatusText">清单还是空的，添加后会自动保存</span></p>
+<div class="add-row">
+<input type="text" id="addInput" placeholder="单独添加一项，如：燕麦奶" aria-label="单独添加一项物料" enterkeyhint="done" />
+<button type="button" id="addBtn" class="primary">添加</button>
+</div>
+<p class="hint" style="margin-top:6px">临时想起一项没在清单里？在上面输入名称点「添加」（或按回车）就加进去了，不用改整份清单。</p>
+<div class="btn-row">
+<button type="button" id="importBtn">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+导入 txt 文件
+</button>
+<input type="file" id="fileInput" accept=".txt,text/plain" hidden />
+<button type="button" id="exampleBtn">填入示例清单</button>
+<button type="button" id="clearBtn">清空清单</button>
+</div>
+<p class="hint">粘贴、导入、单独添加都会自动去重合并，重复的名称不会多算。清单改动后立即自动保存到这台手机的浏览器里，关掉页面、关掉浏览器再打开都还在；只有点「清空清单」才会删掉。近 7 天已经抽过的项目也会自动跳过，不会重复抽到。</p>
+</section>
+
+<!-- 2. 抽取 -->
+<section aria-labelledby="h-draw">
+<div class="sec-head">
+<h2 id="h-draw">2 · 随机抽取</h2>
+</div>
+<div class="draw-row">
+<div class="count-wrap">
+<label for="drawCount">抽取数量（项）</label>
+<div class="count-box">
+<button type="button" id="minusBtn" aria-label="减少抽取数量">−</button>
+<input type="number" id="drawCount" value="10" min="1" max="9999" inputmode="numeric" />
+<button type="button" id="plusBtn" aria-label="增加抽取数量">+</button>
+</div>
+</div>
+<button type="button" id="drawBtn" class="primary">开始抽取</button>
+</div>
+<p class="week-status" id="weekStatus"></p>
+<div class="btn-row">
+<button type="button" id="resetBtn">重置（清掉本次结果）</button>
+</div>
+<div class="msg" id="drawMsg" role="alert"></div>
+<div class="btn-row" id="shortActions" style="display:none">
+<button type="button" id="drawRestBtn" class="primary"></button>
+<button type="button" id="restartWeekBtn">清空本周记录，重新开始</button>
+</div>
+</section>
+
+<!-- 3. 结果 -->
+<section id="resultSection" aria-labelledby="h-result">
+<div class="sec-head">
+<h2 id="h-result">3 · 本次抽查</h2>
+<span class="sec-note" id="drawTime"></span>
+</div>
+<div class="summary-line" id="summaryLine"></div>
+<ol class="results" id="resultList"></ol>
+<div class="result-actions">
+<button type="button" id="markAllOkBtn">全部标为正常</button>
+<button type="button" id="copyBtn" class="primary">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+复制本次结果
+</button>
+</div>
+<p class="hint">复制内容包含抽查时间、每项的正常 / 异常和备注，可直接粘贴到微信发送。</p>
+</section>
+
+<p class="empty-note" id="noResultNote">还没有抽查结果。填好清单后点「开始抽取」，抽到的物料会列在这里，逐项核对就行。</p>
+
+<!-- 4. 近 7 天记录 -->
+<section aria-labelledby="h-history">
+<div class="sec-head">
+<h2 id="h-history">4 · 近 7 天抽取记录</h2>
+</div>
+<div id="historyBody"></div>
+<div class="btn-row">
+<button type="button" id="clearWeekBtn">清空本周记录（开始新一周）</button>
+</div>
+<p class="hint">清单和抽取记录都只保存在这台手机的浏览器里。抽过的项目 7 天内不会再被抽到，满 7 天后自动重新可抽。换手机、换浏览器打开，或清除浏览器数据，清单和记录都会清掉——重要清单建议另外留一份 txt 备份。</p>
+</section>
+
+<!-- 5. 装到手机 -->
+<section aria-labelledby="h-install">
+<div class="sec-head">
+<h2 id="h-install">5 · 装到手机主屏幕</h2>
+</div>
+<p class="install-step"><b>iPhone：</b>用 Safari 打开这个页面，点底部的分享按钮（方框带向上箭头），选择「添加到主屏幕」，以后点主屏幕上的图标就能直接打开，像 App 一样用。</p>
+<p class="install-step"><b>安卓：</b>用 Chrome 打开这个页面，点右上角的 ⋮ 菜单，选择「添加到主屏幕」（有的手机显示「安装应用」），图标就会出现在桌面上。</p>
+</section>
+</main>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+"use strict";
+
+var listInput = document.getElementById("listInput");
+var listCount = document.getElementById("listCount");
+var fileInput = document.getElementById("fileInput");
+var drawCountInput = document.getElementById("drawCount");
+var drawBtn = document.getElementById("drawBtn");
+var drawMsg = document.getElementById("drawMsg");
+var resultSection = document.getElementById("resultSection");
+var resultList = document.getElementById("resultList");
+var summaryLine = document.getElementById("summaryLine");
+var drawTimeEl = document.getElementById("drawTime");
+var noResultNote = document.getElementById("noResultNote");
+var toastEl = document.getElementById("toast");
+
+var drawn = []; // [{name, status: "" | "ok" | "bad", note}]
+var drawnAt = null;
+var toastTimer = null;
+var clearArmed = false;
+var clearTimer = null;
+
+var EXAMPLE = [
+/* 咖啡豆与咖啡制品 */
+"意式拼配咖啡豆", "埃塞俄比亚单品豆", "哥伦比亚单品豆", "巴西单品豆",
+"云南单品豆", "印尼曼特宁豆", "低因咖啡豆", "挂耳咖啡",
+"冷萃咖啡液", "冻干咖啡粉", "咖啡胶囊", "咖啡浓缩液",
+/* 奶与乳制品 */
+"全脂牛奶", "脱脂牛奶", "燕麦奶", "椰奶", "杏仁奶", "豆奶",
+"厚乳", "淡奶油", "喷射奶油", "炼乳", "黄油", "奶油奶酪",
+"马苏里拉芝士", "芝士片", "酸奶", "香草冰淇淋", "巧克力冰淇淋", "牛奶布丁粉",
+/* 糖浆与酱料 */
+"蔗糖糖浆", "香草糖浆", "焦糖糖浆", "榛果糖浆", "黑糖糖浆", "薄荷糖浆",
+"玫瑰糖浆", "椰子糖浆", "巧克力酱", "摩卡酱", "焦糖酱", "海盐焦糖酱",
+"白巧克力酱", "抹茶酱", "蜂蜜", "枫糖浆", "桂花蜜", "柚子酱",
+/* 粉类与小料 */
+"可可粉", "抹茶粉", "焙茶粉", "白砂糖", "黄糖包", "白糖包",
+"代糖包", "海盐", "肉桂粉", "燕麦片", "坚果碎", "椰蓉",
+"奥利奥碎", "珍珠粉圆", "椰果条", "仙草冻", "红豆罐头", "芋圆",
+/* 果酱、水果与饮品基底 */
+"草莓果酱", "蓝莓果酱", "芒果果酱", "百香果酱", "新鲜柠檬", "青柠",
+"橙子", "西柚", "冷冻草莓", "冷冻蓝莓", "冷冻芒果丁", "黄桃罐头",
+"椰子水", "橙汁", "苏打水", "汤力水", "冰块", "纯净水",
+/* 茶叶与茶包 */
+"红茶茶叶", "绿茶茶叶", "乌龙茶叶", "茉莉花茶", "普洱茶叶",
+"红茶茶包", "绿茶茶包", "伯爵茶包", "洋甘菊茶包", "冷泡茶包",
+/* 烘焙与食品 */
+"吐司面包", "全麦面包", "可颂", "贝果", "法棍", "司康",
+"蛋糕胚", "提拉米苏", "芝士蛋糕", "曲奇饼干", "马卡龙", "鸡蛋",
+"火腿片", "培根", "生菜", "番茄",
+/* 包装耗材 */
+"外带纸杯（大）", "外带纸杯（中）", "外带纸杯（小）", "堂食玻璃杯",
+"杯盖（大）", "杯盖（小）", "粗吸管", "细吸管", "搅拌棒", "纸巾",
+"湿纸巾", "外带纸袋", "双杯杯托", "封口膜", "保鲜膜", "锡纸",
+"一次性手套", "一次性叉勺", "打包盒", "标签贴纸", "封口贴", "咖啡滤纸",
+"手冲滤纸", "擦手纸",
+/* 清洁用品 */
+"洗洁精", "消毒液", "洗手液", "厨房湿巾", "抹布", "百洁布",
+"大号垃圾袋", "小号垃圾袋", "地板清洁剂", "玻璃清洁剂", "咖啡机清洁粉",
+"除垢剂", "奶泡清洁剂", "抽纸", "卷纸", "一次性口罩"
+];
+
+/* ===== 物料清单记忆（保存在本机浏览器，下次打开自动恢复） ===== */
+var LIST_KEY = "store-spotcheck-list-v1";
+function loadSavedList() {
+try {
+var raw = localStorage.getItem(LIST_KEY);
+if (!raw) return;
+var arr = JSON.parse(raw);
+if (!Array.isArray(arr)) return;
+var clean = arr.filter(function (n) { return typeof n === "string" && n.trim();});
+if (clean.length) listInput.value = clean.join("\n");
+} catch (e) {}
+}
+function saveList() {
+try {
+var items = parseList();
+if (items.length === 0) { localStorage.removeItem(LIST_KEY); return;}
+localStorage.setItem(LIST_KEY, JSON.stringify(items));
+} catch (e) {}
+}
+loadSavedList();
+
+/* ===== 近 7 天抽取记录（保存在本机浏览器，滚动 7 天） ===== */
+var HISTORY_KEY = "store-spotcheck-history-v1";
+var history = loadHistory(); // [{name, d: "YYYY-MM-DD"}]
+pruneHistory();
+saveHistory();
+
+function dateKey(d) {
+function p(n) { return (n < 10? "0": "") + n;}
+return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+}
+function loadHistory() {
+try {
+var raw = localStorage.getItem(HISTORY_KEY);
+if (!raw) return [];
+var arr = JSON.parse(raw);
+if (!Array.isArray(arr)) return [];
+return arr.filter(function (e) {
+return e && typeof e.name === "string" && typeof e.d === "string";
+});
+} catch (e) { return [];}
+}
+function saveHistory() {
+try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history));} catch (e) {}
+}
+function pruneHistory() {
+var cutoff = new Date();
+cutoff.setHours(0, 0, 0, 0);
+cutoff.setDate(cutoff.getDate() - 6);
+var ck = dateKey(cutoff);
+history = history.filter(function (e) { return e.d >= ck;});
+}
+function recentNameSet() {
+var set = {};
+history.forEach(function (e) { set[e.name] = true;});
+return set;
+}
+function clearWeekHistory() {
+history = [];
+saveHistory();
+renderWeekStatus();
+renderHistory();
+}
+function renderWeekStatus() {
+pruneHistory();
+var pool = parseList();
+var recent = recentNameSet();
+var used = 0;
+pool.forEach(function (n) { if (recent[n]) used++;});
+var el = document.getElementById("weekStatus");
+if (!el) return;
+el.innerHTML = "";
+el.appendChild(document.createTextNode("近 7 天已抽过 "));
+var b1 = document.createElement("b");
+b1.textContent = used + " 项";
+el.appendChild(b1);
+el.appendChild(document.createTextNode("，清单里还剩 "));
+var b2 = document.createElement("b");
+b2.textContent = (pool.length - used) + " 项";
+el.appendChild(b2);
+el.appendChild(document.createTextNode(" 可抽"));
+}
+function renderHistory() {
+var wrap = document.getElementById("historyBody");
+var clearBtn2 = document.getElementById("clearWeekBtn");
+if (!wrap) return;
+wrap.innerHTML = "";
+if (history.length === 0) {
+var p = document.createElement("p");
+p.className = "empty-note";
+p.textContent = "近 7 天还没有抽取记录。";
+wrap.appendChild(p);
+if (clearBtn2) clearBtn2.style.display = "none";
+return;
+}
+if (clearBtn2) clearBtn2.style.display = "";
+var groups = {};
+var order = [];
+history.forEach(function (e) {
+if (!groups[e.d]) { groups[e.d] = []; order.push(e.d);}
+if (groups[e.d].indexOf(e.name) === -1) groups[e.d].push(e.name);
+});
+order.sort().reverse();
+var today = dateKey(new Date());
+var yest = new Date();
+yest.setDate(yest.getDate() - 1);
+var yk = dateKey(yest);
+order.forEach(function (d) {
+var g = document.createElement("div");
+g.className = "hist-group";
+var h = document.createElement("div");
+h.className = "hist-date";
+var label = d;
+if (d === today) label = d + "（今天）";
+else if (d === yk) label = d + "（昨天）";
+h.textContent = label + " · 共 " + groups[d].length + " 项";
+g.appendChild(h);
+var chips = document.createElement("div");
+chips.className = "hist-chips";
+groups[d].forEach(function (name) {
+var c = document.createElement("span");
+c.className = "chip";
+c.textContent = name;
+chips.appendChild(c);
+});
+g.appendChild(chips);
+wrap.appendChild(g);
+});
+}
+
+/* 清空本周记录：点两次确认 */
+var clearWeekBtn = document.getElementById("clearWeekBtn");
+var weekArmed = false;
+var weekTimer = null;
+if (clearWeekBtn) {
+clearWeekBtn.addEventListener("click", function () {
+if (history.length === 0) { showToast("本周还没有抽取记录"); return;}
+if (!weekArmed) {
+weekArmed = true;
+clearWeekBtn.textContent = "再点一次确认清空";
+clearWeekBtn.classList.add("danger-armed");
+weekTimer = setTimeout(disarmWeek, 3000);
+return;
+}
+disarmWeek();
+clearWeekHistory();
+showToast("本周记录已清空，可以重新开始抽了");
+});
+}
+function disarmWeek() {
+weekArmed = false;
+if (weekTimer) clearTimeout(weekTimer);
+if (clearWeekBtn) {
+clearWeekBtn.textContent = "清空本周记录（开始新一周）";
+clearWeekBtn.classList.remove("danger-armed");
+}
+}
+
+function showToast(text) {
+toastEl.textContent = text;
+toastEl.classList.add("show");
+if (toastTimer) clearTimeout(toastTimer);
+toastTimer = setTimeout(function () { toastEl.classList.remove("show");}, 2200);
+}
+
+function parseList() {
+var seen = {};
+var out = [];
+var lines = listInput.value.split(/\r?\n/);
+for (var i = 0; i < lines.length; i++) {
+var name = lines[i].trim();
+if (!name) continue;
+if (seen[name]) continue;
+seen[name] = true;
+out.push(name);
+}
+return out;
+}
+
+function updateCount() {
+var n = parseList().length;
+listCount.textContent = "共 " + n + " 项";
+saveList();
+var box = document.getElementById("saveStatus");
+var txt = document.getElementById("saveStatusText");
+if (box && txt) {
+if (n > 0) {
+box.classList.remove("empty");
+txt.textContent = "已自动保存 · 共 " + n + " 项，下次打开还在，不用重新粘贴";
+} else {
+box.classList.add("empty");
+txt.textContent = "清单还是空的，添加后会自动保存";
+}
+}
+renderWeekStatus();
+}
+
+/* 单独添加一项 */
+function addSingleItem() {
+var input = document.getElementById("addInput");
+var name = (input.value || "").trim();
+if (!name) { showToast("先输入物料名称"); input.focus(); return;}
+var pool = parseList();
+if (pool.indexOf(name) !== -1) {
+showToast("「" + name + "」已经在清单里了");
+input.value = "";
+input.focus();
+return;
+}
+listInput.value = (listInput.value.replace(/\s+$/, "") + (listInput.value.trim()? "\n": "") + name);
+input.value = "";
+updateCount();
+showToast("已添加「" + name + "」，清单共 " + parseList().length + " 项，已保存");
+input.focus();
+}
+document.getElementById("addBtn").addEventListener("click", addSingleItem);
+document.getElementById("addInput").addEventListener("keydown", function (e) {
+if (e.key === "Enter") { e.preventDefault(); addSingleItem();}
+});
+
+function showMsg(text) {
+if (!text) { drawMsg.classList.remove("show"); drawMsg.textContent = ""; return;}
+drawMsg.textContent = text;
+drawMsg.classList.add("show");
+}
+
+listInput.addEventListener("input", updateCount);
+
+/* 导入 txt */
+document.getElementById("importBtn").addEventListener("click", function () {
+fileInput.click();
+});
+fileInput.addEventListener("change", function () {
+var file = fileInput.files && fileInput.files[0];
+fileInput.value = "";
+if (!file) return;
+var reader = new FileReader();
+reader.onload = function () {
+var text = String(reader.result || "");
+var before = parseList().length;
+listInput.value = (listInput.value.replace(/\s+$/, "") + (listInput.value.trim()? "\n": "") + text).replace(/\n{3,}/g, "\n\n");
+updateCount();
+var added = parseList().length - before;
+showToast(added > 0? "已导入 " + added + " 项物料": "文件里没有新的物料");
+};
+reader.onerror = function () { showToast("文件读取失败，请重试");};
+reader.readAsText(file);
+});
+
+/* 示例清单 */
+document.getElementById("exampleBtn").addEventListener("click", function () {
+if (listInput.value.trim()) {
+listInput.value = listInput.value.replace(/\s+$/, "") + "\n" + EXAMPLE.join("\n");
+} else {
+listInput.value = EXAMPLE.join("\n");
+}
+updateCount();
+showToast("示例已合并进清单并自动保存，可直接改成你店里的物料");
+});
+
+/* 清空清单：点两次确认 */
+var clearBtn = document.getElementById("clearBtn");
+clearBtn.addEventListener("click", function () {
+if (!listInput.value.trim() && drawn.length === 0) { showToast("清单已经是空的"); return;}
+if (!clearArmed) {
+clearArmed = true;
+clearBtn.textContent = "再点一次确认清空";
+clearBtn.classList.add("danger-armed");
+clearTimer = setTimeout(function () { disarmClear();}, 3000);
+return;
+}
+disarmClear();
+listInput.value = "";
+try { localStorage.removeItem(LIST_KEY);} catch (e) {}
+updateCount();
+resetResults();
+showToast("清单已清空，保存的清单也已删除");
+});
+function disarmClear() {
+clearArmed = false;
+if (clearTimer) clearTimeout(clearTimer);
+clearBtn.textContent = "清空清单";
+clearBtn.classList.remove("danger-armed");
+}
+
+/* 数量步进 */
+function clampCount() {
+var v = parseInt(drawCountInput.value, 10);
+if (isNaN(v) || v < 1) v = 1;
+if (v > 9999) v = 9999;
+drawCountInput.value = v;
+return v;
+}
+document.getElementById("minusBtn").addEventListener("click", function () {
+drawCountInput.value = Math.max(1, (parseInt(drawCountInput.value, 10) || 1) - 1);
+});
+document.getElementById("plusBtn").addEventListener("click", function () {
+drawCountInput.value = Math.min(9999, (parseInt(drawCountInput.value, 10) || 0) + 1);
+});
+drawCountInput.addEventListener("change", clampCount);
+
+/* 随机抽取：Fisher–Yates 洗牌后取前 N 个，保证不重复 */
+function shuffle(arr) {
+for (var i = arr.length - 1; i > 0; i--) {
+var j = Math.floor(Math.random() * (i + 1));
+var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+}
+return arr;
+}
+
+var pendingAvail = null;
+
+function hideShort() {
+pendingAvail = null;
+document.getElementById("shortActions").style.display = "none";
+}
+
+function startDraw(pickPool, n) {
+hideShort();
+showMsg("");
+drawBtn.disabled = true;
+var original = drawBtn.innerHTML;
+drawBtn.innerHTML = "";
+var sp = document.createElement("span");
+sp.className = "spinner";
+drawBtn.appendChild(sp);
+drawBtn.appendChild(document.createTextNode("抽取中…"));
+
+setTimeout(function () {
+var picked = shuffle(pickPool.slice()).slice(0, n);
+drawn = picked.map(function (name) { return { name: name, status: "", note: ""};});
+drawnAt = new Date();
+var today = dateKey(drawnAt);
+picked.forEach(function (name) { history.push({ name: name, d: today });});
+saveHistory();
+renderResults();
+renderWeekStatus();
+renderHistory();
+drawBtn.disabled = false;
+drawBtn.innerHTML = original;
+resultSection.scrollIntoView({ behavior: "smooth", block: "start"});
+}, 450);
+}
+
+drawBtn.addEventListener("click", function () {
+showMsg("");
+hideShort();
+var pool = parseList();
+var want = clampCount();
+if (pool.length === 0) {
+showMsg("清单是空的。先粘贴物料清单，或导入 txt 文件，再开始抽取。");
+listInput.focus();
+return;
+}
+if (want > pool.length) {
+showMsg("清单里只有 " + pool.length + " 项，抽不了 " + want + " 项。把抽取数量改小，或往清单里再加些物料。");
+return;
+}
+pruneHistory();
+var recent = recentNameSet();
+var avail = pool.filter(function (name) { return !recent[name];});
+if (avail.length >= want) {
+startDraw(avail, want);
+return;
+}
+/* 近 7 天剩下的不够本次抽取数量，让用户选 */
+pendingAvail = avail;
+var restBtn = document.getElementById("drawRestBtn");
+if (avail.length > 0) {
+showMsg("近 7 天已经抽过 " + (pool.length - avail.length) + " 项，清单里只剩 " + avail.length + " 项没抽过，不够这次要抽的 " + want + " 项。可以只抽剩下的 " + avail.length + " 项，或者清空本周记录、从整份清单重新开始。");
+restBtn.style.display = "";
+restBtn.textContent = "只抽剩下的 " + avail.length + " 项";
+} else {
+showMsg("清单里的 " + pool.length + " 项近 7 天都已经抽过了。清空本周记录后就能重新开始抽。");
+restBtn.style.display = "none";
+}
+document.getElementById("shortActions").style.display = "";
+});
+
+document.getElementById("drawRestBtn").addEventListener("click", function () {
+if (!pendingAvail || pendingAvail.length === 0) return;
+startDraw(pendingAvail, pendingAvail.length);
+});
+document.getElementById("restartWeekBtn").addEventListener("click", function () {
+clearWeekHistory();
+showMsg("");
+var pool = parseList();
+var want = clampCount();
+if (pool.length === 0) return;
+if (want > pool.length) want = pool.length;
+startDraw(pool, want);
+showToast("已清空本周记录，开始新一轮抽取");
+});
+
+/* 重置 */
+document.getElementById("resetBtn").addEventListener("click", function () {
+hideShort();
+showMsg("");
+if (drawn.length === 0) { showToast("还没有抽查结果"); return;}
+resetResults();
+showToast("本次结果已清除，清单和本周记录都还在");
+});
+function resetResults() {
+drawn = [];
+drawnAt = null;
+resultList.innerHTML = "";
+resultSection.classList.remove("show");
+noResultNote.style.display = "";
+}
+
+/* 结果渲染 */
+function fmtTime(d) {
+function p(n) { return (n < 10? "0": "") + n;}
+return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) +
+" " + p(d.getHours()) + ":" + p(d.getMinutes());
+}
+
+function renderResults() {
+resultList.innerHTML = "";
+drawn.forEach(function (item, idx) {
+var li = document.createElement("li");
+
+var top = document.createElement("div");
+top.className = "item-top";
+
+var idxEl = document.createElement("span");
+idxEl.className = "item-idx";
+idxEl.textContent = idx + 1;
+
+var nameEl = document.createElement("span");
+nameEl.className = "item-name";
+nameEl.textContent = item.name;
+
+var seg = document.createElement("div");
+seg.className = "seg";
+seg.setAttribute("role", "group");
+seg.setAttribute("aria-label", item.name + " 核对结果");
+
+var okBtn = document.createElement("button");
+okBtn.type = "button";
+okBtn.className = "seg-ok";
+okBtn.textContent = "正常";
+okBtn.setAttribute("aria-pressed", item.status === "ok"? "true": "false");
+okBtn.addEventListener("click", function () {
+item.status = item.status === "ok"? "": "ok";
+renderResults();
+});
+
+var badBtn = document.createElement("button");
+badBtn.type = "button";
+badBtn.className = "seg-bad";
+badBtn.textContent = "异常";
+badBtn.setAttribute("aria-pressed", item.status === "bad"? "true": "false");
+badBtn.addEventListener("click", function () {
+item.status = item.status === "bad"? "": "bad";
+renderResults();
+if (item.status === "bad") {
+var note = resultList.querySelectorAll(".item-note")[idx];
+if (note) note.focus({ preventScroll: true});
+}
+});
+
+seg.appendChild(okBtn);
+seg.appendChild(badBtn);
+
+top.appendChild(idxEl);
+top.appendChild(nameEl);
+top.appendChild(seg);
+li.appendChild(top);
+
+var noteInput = document.createElement("input");
+noteInput.type = "text";
+noteInput.className = "item-note" + (item.status === "bad"? " attn": "");
+noteInput.placeholder = item.status === "bad"? "写清异常情况，如：只剩 2 袋 / 已过期": "备注（可选）";
+noteInput.value = item.note;
+noteInput.setAttribute("aria-label", item.name + " 备注");
+noteInput.addEventListener("input", function () {
+item.note = noteInput.value;
+});
+li.appendChild(noteInput);
+
+resultList.appendChild(li);
+});
+
+drawTimeEl.textContent = drawnAt? fmtTime(drawnAt): "";
+resultSection.classList.add("show");
+noResultNote.style.display = "none";
+renderSummary();
+}
+
+function renderSummary() {
+var ok = 0, bad = 0;
+drawn.forEach(function (it) {
+if (it.status === "ok") ok++;
+else if (it.status === "bad") bad++;
+});
+var unmarked = drawn.length - ok - bad;
+summaryLine.innerHTML = "";
+function part(cls, label, num) {
+var s = document.createElement("span");
+if (cls) s.className = cls;
+s.appendChild(document.createTextNode(label + " "));
+var b = document.createElement("b");
+b.textContent = num;
+s.appendChild(b);
+return s;
+}
+summaryLine.appendChild(part("", "共抽查", drawn.length + " 项"));
+summaryLine.appendChild(part("s-ok", "正常", ok + " 项"));
+summaryLine.appendChild(part("s-bad", "异常", bad + " 项"));
+summaryLine.appendChild(part("", "未标记", unmarked + " 项"));
+}
+
+/* 全部标为正常 */
+document.getElementById("markAllOkBtn").addEventListener("click", function () {
+drawn.forEach(function (it) { if (!it.status) it.status = "ok";});
+renderResults();
+showToast("未标记的都已标为正常");
+});
+
+/* 复制结果 */
+document.getElementById("copyBtn").addEventListener("click", function () {
+if (drawn.length === 0) return;
+var ok = 0, bad = 0, un = 0;
+var lines = [];
+lines.push("");
+lines.push("抽查时间：" + fmtTime(drawnAt || new Date()));
+lines.push("本次共抽查 " + drawn.length + " 项：");
+drawn.forEach(function (it, i) {
+var st = it.status === "ok"? "正常": it.status === "bad"? "异常": "未标记";
+if (it.status === "ok") ok++; else if (it.status === "bad") bad++; else un++;
+var line = (i + 1) + ". " + it.name + " —— " + st;
+if (it.note && it.note.trim()) line += "（" + it.note.trim() + "）";
+lines.push(line);
+});
+lines.push("汇总：正常 " + ok + " 项，异常 " + bad + " 项，未标记 " + un + " 项");
+var text = lines.join("\n");
+
+function done() { showToast("已复制，去微信粘贴发送就行");}
+function fallback() {
+var ta = document.createElement("textarea");
+ta.value = text;
+ta.style.position = "fixed";
+ta.style.opacity = "0";
+document.body.appendChild(ta);
+ta.select();
+try { document.execCommand("copy"); done();}
+catch (e) { showToast("复制失败，请长按结果手动复制");}
+document.body.removeChild(ta);
+}
+if (navigator.clipboard && navigator.clipboard.writeText) {
+navigator.clipboard.writeText(text).then(done, fallback);
+} else {
+fallback();
+}
+});
+
+updateCount();
+renderHistory();
+})();
+</script>
+</body>
+</html>
