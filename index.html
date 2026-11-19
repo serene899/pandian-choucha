@@ -283,6 +283,34 @@ font-weight: 600;
 word-break: break-all;
 padding-top: 2px;
 }
+.item-name-wrap { flex: 1; min-width: 0; }
+.item-tag {
+display: inline-block;
+font-size: 11px;
+font-weight: 700;
+line-height: 1.4;
+padding: 1px 7px;
+border-radius: 999px;
+margin-top: 3px;
+letter-spacing: 0.02em;
+}
+.tag-fixed { background: var(--accent-soft); color: var(--accent); }
+.tag-random { background: var(--surface-2); color: var(--ink-2); }
+.group-head {
+list-style: none;
+font-size: 13px;
+font-weight: 700;
+color: var(--ink-2);
+padding: 14px 0 2px;
+border-top: 0 !important;
+}
+.group-head:first-child { padding-top: 2px; }
+.summary-sub {
+font-size: 13px;
+color: var(--ink-3);
+margin: 0 0 2px;
+}
+textarea.small { min-height: 110px; }
 .seg {
 flex: none;
 display: flex;
@@ -410,12 +438,12 @@ z-index: 50;
 <body>
 <main>
 <h1>门店物料盘点抽查</h1>
-<p class="lede">物料清单会自动保存在这台手机里，下次打开还在，不用每次重新粘贴。随机抽几项出来逐项核对，标好正常 / 异常后一键复制发给同事或主管。近 7 天抽过的项目不会再被抽到，一周内不重复。</p>
+<p class="lede">两份清单都会自动保存在这台手机里，下次打开还在，不用每次重新粘贴。每天点「开始抽取」，结果 = 全部每日必查项（每天都出）+ 随机抽的几项，逐项核对后一键复制发给同事或主管。随机部分近 7 天抽过的不会再被抽到，一周内不重复。</p>
 
-<!-- 1. 清单 -->
+<!-- 1. 随机清单 -->
 <section aria-labelledby="h-list">
 <div class="sec-head">
-<h2 id="h-list">1 · 物料清单</h2>
+<h2 id="h-list">1 · 随机抽查清单</h2>
 <span class="sec-note" id="listCount">共 0 项</span>
 </div>
 <label class="field-label" for="listInput">一行一条物料名称，可直接粘贴整份清单（数量不限，几百、几千项都可以）</label>
@@ -435,17 +463,41 @@ z-index: 50;
 <button type="button" id="exampleBtn">填入示例清单</button>
 <button type="button" id="clearBtn">清空清单</button>
 </div>
-<p class="hint">粘贴、导入、单独添加都会自动去重合并，重复的名称不会多算。清单改动后立即自动保存到这台手机的浏览器里，关掉页面、关掉浏览器再打开都还在；只有点「清空清单」才会删掉。近 7 天已经抽过的项目也会自动跳过，不会重复抽到。</p>
+<p class="hint">粘贴、导入、单独添加都会自动去重合并，重复的名称不会多算。清单改动后立即自动保存到这台手机的浏览器里，关掉页面、关掉浏览器再打开都还在；只有点「清空清单」才会删掉。近 7 天已经抽过的项目也会自动跳过，不会重复抽到。已经放进下面「每日必查清单」的项目，也不会再被随机抽到，避免同一天出现两次。</p>
 </section>
 
-<!-- 2. 抽取 -->
+<!-- 2. 每日必查清单 -->
+<section aria-labelledby="h-fixed">
+<div class="sec-head">
+<h2 id="h-fixed">2 · 每日必查清单</h2>
+<span class="sec-note" id="fixedCount">共 0 项</span>
+</div>
+<label class="field-label" for="fixedInput">老板要求每天都查的东西放这里，一行一条。每天抽取时这里的每一项都会出现，不用抽。</label>
+<textarea id="fixedInput" class="small" placeholder="例如：&#10;意式拼配咖啡豆&#10;全脂牛奶&#10;冰块&#10;……" spellcheck="false"></textarea>
+<p class="save-status empty" id="fixedSaveStatus"><span class="dot" aria-hidden="true"></span><span id="fixedSaveStatusText">必查清单还是空的，添加后会自动保存</span></p>
+<div class="add-row">
+<input type="text" id="fixedAddInput" placeholder="单独添加一项必查，如：全脂牛奶" aria-label="单独添加一项必查物料" enterkeyhint="done" />
+<button type="button" id="fixedAddBtn" class="primary">添加</button>
+</div>
+<div class="btn-row">
+<button type="button" id="fixedImportBtn">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+导入 txt 文件
+</button>
+<input type="file" id="fixedFileInput" accept=".txt,text/plain" hidden />
+<button type="button" id="fixedClearBtn">清空必查清单</button>
+</div>
+<p class="hint">必查清单和随机清单分开保存、分开清空，互不影响。必查项每天都会出现在结果最前面，不占随机抽取数量，也不会进入近 7 天排除记录。不填也没关系，只出随机项，和以前一样。</p>
+</section>
+
+<!-- 3. 抽取 -->
 <section aria-labelledby="h-draw">
 <div class="sec-head">
-<h2 id="h-draw">2 · 随机抽取</h2>
+<h2 id="h-draw">3 · 开始抽取</h2>
 </div>
 <div class="draw-row">
 <div class="count-wrap">
-<label for="drawCount">抽取数量（项）</label>
+<label for="drawCount">随机抽取数量（项）</label>
 <div class="count-box">
 <button type="button" id="minusBtn" aria-label="减少抽取数量">−</button>
 <input type="number" id="drawCount" value="10" min="1" max="9999" inputmode="numeric" />
@@ -465,12 +517,13 @@ z-index: 50;
 </div>
 </section>
 
-<!-- 3. 结果 -->
+<!-- 4. 结果 -->
 <section id="resultSection" aria-labelledby="h-result">
 <div class="sec-head">
-<h2 id="h-result">3 · 本次抽查</h2>
+<h2 id="h-result">4 · 本次抽查</h2>
 <span class="sec-note" id="drawTime"></span>
 </div>
+<p class="summary-sub" id="summaryBreakdown"></p>
 <div class="summary-line" id="summaryLine"></div>
 <ol class="results" id="resultList"></ol>
 <div class="result-actions">
@@ -480,27 +533,27 @@ z-index: 50;
 复制本次结果
 </button>
 </div>
-<p class="hint">复制内容包含抽查时间、每项的正常 / 异常和备注，可直接粘贴到微信发送。</p>
+<p class="hint">复制内容分【每日必查】和【随机抽查】两段，包含抽查时间、每项的正常 / 异常和备注，可直接粘贴到微信发送。</p>
 </section>
 
-<p class="empty-note" id="noResultNote">还没有抽查结果。填好清单后点「开始抽取」，抽到的物料会列在这里，逐项核对就行。</p>
+<p class="empty-note" id="noResultNote">还没有抽查结果。填好清单后点「开始抽取」，必查项和随机抽到的物料会列在这里，逐项核对就行。</p>
 
-<!-- 4. 近 7 天记录 -->
+<!-- 5. 近 7 天记录 -->
 <section aria-labelledby="h-history">
 <div class="sec-head">
-<h2 id="h-history">4 · 近 7 天抽取记录</h2>
+<h2 id="h-history">5 · 近 7 天随机抽取记录</h2>
 </div>
 <div id="historyBody"></div>
 <div class="btn-row">
 <button type="button" id="clearWeekBtn">清空本周记录（开始新一周）</button>
 </div>
-<p class="hint">清单和抽取记录都只保存在这台手机的浏览器里。抽过的项目 7 天内不会再被抽到，满 7 天后自动重新可抽。换手机、换浏览器打开，或清除浏览器数据，清单和记录都会清掉——重要清单建议另外留一份 txt 备份。</p>
+<p class="hint">两份清单和抽取记录都只保存在这台手机的浏览器里。这里只记随机抽过的项目（必查项天天查，不记在这里）。随机抽过的项目 7 天内不会再被抽到，满 7 天后自动重新可抽。换手机、换浏览器打开，或清除浏览器数据，清单和记录都会清掉——重要清单建议另外留一份 txt 备份。</p>
 </section>
 
-<!-- 5. 装到手机 -->
+<!-- 6. 装到手机 -->
 <section aria-labelledby="h-install">
 <div class="sec-head">
-<h2 id="h-install">5 · 装到手机主屏幕</h2>
+<h2 id="h-install">6 · 装到手机主屏幕</h2>
 </div>
 <p class="install-step"><b>iPhone：</b>用 Safari 打开这个页面，点底部的分享按钮（方框带向上箭头），选择「添加到主屏幕」，以后点主屏幕上的图标就能直接打开，像 App 一样用。</p>
 <p class="install-step"><b>安卓：</b>用 Chrome 打开这个页面，点右上角的 ⋮ 菜单，选择「添加到主屏幕」（有的手机显示「安装应用」），图标就会出现在桌面上。</p>
@@ -516,6 +569,9 @@ z-index: 50;
 var listInput = document.getElementById("listInput");
 var listCount = document.getElementById("listCount");
 var fileInput = document.getElementById("fileInput");
+var fixedInput = document.getElementById("fixedInput");
+var fixedCount = document.getElementById("fixedCount");
+var fixedFileInput = document.getElementById("fixedFileInput");
 var drawCountInput = document.getElementById("drawCount");
 var drawBtn = document.getElementById("drawBtn");
 var drawMsg = document.getElementById("drawMsg");
@@ -526,7 +582,7 @@ var drawTimeEl = document.getElementById("drawTime");
 var noResultNote = document.getElementById("noResultNote");
 var toastEl = document.getElementById("toast");
 
-var drawn = []; // [{name, status: "" | "ok" | "bad", note}]
+var drawn = []; // [{name, status: "" | "ok" | "bad", note, kind: "fixed" | "random"}]
 var drawnAt = null;
 var toastTimer = null;
 var clearArmed = false;
@@ -593,6 +649,27 @@ localStorage.setItem(LIST_KEY, JSON.stringify(items));
 }
 loadSavedList();
 
+/* ===== 每日必查清单记忆（与随机清单分开存） ===== */
+var FIXED_KEY = "store-spotcheck-fixed-v1";
+function loadSavedFixed() {
+try {
+var raw = localStorage.getItem(FIXED_KEY);
+if (!raw) return;
+var arr = JSON.parse(raw);
+if (!Array.isArray(arr)) return;
+var clean = arr.filter(function (n) { return typeof n === "string" && n.trim();});
+if (clean.length) fixedInput.value = clean.join("\n");
+} catch (e) {}
+}
+function saveFixed() {
+try {
+var items = parseFixedList();
+if (items.length === 0) { localStorage.removeItem(FIXED_KEY); return;}
+localStorage.setItem(FIXED_KEY, JSON.stringify(items));
+} catch (e) {}
+}
+loadSavedFixed();
+
 /* ===== 近 7 天抽取记录（保存在本机浏览器，滚动 7 天） ===== */
 var HISTORY_KEY = "store-spotcheck-history-v1";
 var history = loadHistory(); // [{name, d: "YYYY-MM-DD"}]
@@ -635,20 +712,38 @@ saveHistory();
 renderWeekStatus();
 renderHistory();
 }
+function fixedNameSet() {
+var set = {};
+parseFixedList().forEach(function (n) { set[n] = true;});
+return set;
+}
+function randomPool() {
+/* 随机池 = 随机清单去掉已在必查清单里的项目，避免同一天重复出现 */
+var fx = fixedNameSet();
+return parseList().filter(function (n) { return !fx[n];});
+}
 function renderWeekStatus() {
 pruneHistory();
-var pool = parseList();
+var pool = randomPool();
 var recent = recentNameSet();
 var used = 0;
 pool.forEach(function (n) { if (recent[n]) used++;});
 var el = document.getElementById("weekStatus");
 if (!el) return;
 el.innerHTML = "";
+var fxN = parseFixedList().length;
+if (fxN > 0) {
+el.appendChild(document.createTextNode("每日必查 "));
+var bf = document.createElement("b");
+bf.textContent = fxN + " 项";
+el.appendChild(bf);
+el.appendChild(document.createTextNode(" 每天都会出。随机部分："));
+}
 el.appendChild(document.createTextNode("近 7 天已抽过 "));
 var b1 = document.createElement("b");
 b1.textContent = used + " 项";
 el.appendChild(b1);
-el.appendChild(document.createTextNode("，清单里还剩 "));
+el.appendChild(document.createTextNode("，随机清单里还剩 "));
 var b2 = document.createElement("b");
 b2.textContent = (pool.length - used) + " 项";
 el.appendChild(b2);
@@ -751,6 +846,38 @@ out.push(name);
 return out;
 }
 
+function parseFixedList() {
+var seen = {};
+var out = [];
+var lines = fixedInput.value.split(/\r?\n/);
+for (var i = 0; i < lines.length; i++) {
+var name = lines[i].trim();
+if (!name) continue;
+if (seen[name]) continue;
+seen[name] = true;
+out.push(name);
+}
+return out;
+}
+
+function updateFixedCount() {
+var n = parseFixedList().length;
+fixedCount.textContent = "共 " + n + " 项";
+saveFixed();
+var box = document.getElementById("fixedSaveStatus");
+var txt = document.getElementById("fixedSaveStatusText");
+if (box && txt) {
+if (n > 0) {
+box.classList.remove("empty");
+txt.textContent = "已自动保存 · 共 " + n + " 项，每天抽取都会全部出现";
+} else {
+box.classList.add("empty");
+txt.textContent = "必查清单还是空的，添加后会自动保存";
+}
+}
+renderWeekStatus();
+}
+
 function updateCount() {
 var n = parseList().length;
 listCount.textContent = "共 " + n + " 项";
@@ -791,6 +918,77 @@ document.getElementById("addBtn").addEventListener("click", addSingleItem);
 document.getElementById("addInput").addEventListener("keydown", function (e) {
 if (e.key === "Enter") { e.preventDefault(); addSingleItem();}
 });
+
+/* 必查清单：单独添加一项 */
+function addFixedItem() {
+var input = document.getElementById("fixedAddInput");
+var name = (input.value || "").trim();
+if (!name) { showToast("先输入必查物料名称"); input.focus(); return;}
+var pool = parseFixedList();
+if (pool.indexOf(name) !== -1) {
+showToast("「" + name + "」已经在必查清单里了");
+input.value = "";
+input.focus();
+return;
+}
+fixedInput.value = (fixedInput.value.replace(/\s+$/, "") + (fixedInput.value.trim()? "\n": "") + name);
+input.value = "";
+updateFixedCount();
+showToast("已添加必查「" + name + "」，必查共 " + parseFixedList().length + " 项，已保存");
+input.focus();
+}
+document.getElementById("fixedAddBtn").addEventListener("click", addFixedItem);
+document.getElementById("fixedAddInput").addEventListener("keydown", function (e) {
+if (e.key === "Enter") { e.preventDefault(); addFixedItem();}
+});
+fixedInput.addEventListener("input", updateFixedCount);
+
+/* 必查清单：导入 txt */
+document.getElementById("fixedImportBtn").addEventListener("click", function () {
+fixedFileInput.click();
+});
+fixedFileInput.addEventListener("change", function () {
+var file = fixedFileInput.files && fixedFileInput.files[0];
+fixedFileInput.value = "";
+if (!file) return;
+var reader = new FileReader();
+reader.onload = function () {
+var text = String(reader.result || "");
+var before = parseFixedList().length;
+fixedInput.value = (fixedInput.value.replace(/\s+$/, "") + (fixedInput.value.trim()? "\n": "") + text).replace(/\n{3,}/g, "\n\n");
+updateFixedCount();
+var added = parseFixedList().length - before;
+showToast(added > 0? "已导入 " + added + " 项必查物料": "文件里没有新的必查物料");
+};
+reader.onerror = function () { showToast("文件读取失败，请重试");};
+reader.readAsText(file);
+});
+
+/* 必查清单：清空（点两次确认，与随机清单分开） */
+var fixedClearBtn = document.getElementById("fixedClearBtn");
+var fixedClearArmed = false;
+var fixedClearTimer = null;
+fixedClearBtn.addEventListener("click", function () {
+if (!fixedInput.value.trim()) { showToast("必查清单已经是空的"); return;}
+if (!fixedClearArmed) {
+fixedClearArmed = true;
+fixedClearBtn.textContent = "再点一次确认清空";
+fixedClearBtn.classList.add("danger-armed");
+fixedClearTimer = setTimeout(disarmFixedClear, 3000);
+return;
+}
+disarmFixedClear();
+fixedInput.value = "";
+try { localStorage.removeItem(FIXED_KEY);} catch (e) {}
+updateFixedCount();
+showToast("必查清单已清空，随机清单不受影响");
+});
+function disarmFixedClear() {
+fixedClearArmed = false;
+if (fixedClearTimer) clearTimeout(fixedClearTimer);
+fixedClearBtn.textContent = "清空必查清单";
+fixedClearBtn.classList.remove("danger-armed");
+}
 
 function showMsg(text) {
 if (!text) { drawMsg.classList.remove("show"); drawMsg.textContent = ""; return;}
@@ -901,10 +1099,14 @@ drawBtn.appendChild(sp);
 drawBtn.appendChild(document.createTextNode("抽取中…"));
 
 setTimeout(function () {
-var picked = shuffle(pickPool.slice()).slice(0, n);
-drawn = picked.map(function (name) { return { name: name, status: "", note: ""};});
+var picked = n > 0? shuffle(pickPool.slice()).slice(0, n): [];
+var fixedNames = parseFixedList();
+var fixedItems = fixedNames.map(function (name) { return { name: name, status: "", note: "", kind: "fixed" };});
+var randomItems = picked.map(function (name) { return { name: name, status: "", note: "", kind: "random" };});
+drawn = fixedItems.concat(randomItems);
 drawnAt = new Date();
 var today = dateKey(drawnAt);
+/* 只有随机抽到的才记入近 7 天记录；必查项天天查，不进排除历史 */
 picked.forEach(function (name) { history.push({ name: name, d: today });});
 saveHistory();
 renderResults();
@@ -919,15 +1121,21 @@ resultSection.scrollIntoView({ behavior: "smooth", block: "start"});
 drawBtn.addEventListener("click", function () {
 showMsg("");
 hideShort();
-var pool = parseList();
+var fixedNames = parseFixedList();
+var pool = randomPool();
 var want = clampCount();
-if (pool.length === 0) {
-showMsg("清单是空的。先粘贴物料清单，或导入 txt 文件，再开始抽取。");
+if (pool.length === 0 && fixedNames.length === 0) {
+showMsg("两份清单都是空的。先往随机清单或每日必查清单里加物料，再开始抽取。");
 listInput.focus();
 return;
 }
+if (pool.length === 0) {
+/* 只有必查清单，直接出全部必查项 */
+startDraw([], 0);
+return;
+}
 if (want > pool.length) {
-showMsg("清单里只有 " + pool.length + " 项，抽不了 " + want + " 项。把抽取数量改小，或往清单里再加些物料。");
+showMsg("随机清单里可抽的只有 " + pool.length + " 项（已除去必查清单里的项目），抽不了 " + want + " 项。把随机抽取数量改小，或往随机清单里再加些物料。必查的 " + fixedNames.length + " 项不受影响、照常全出。");
 return;
 }
 pruneHistory();
@@ -937,15 +1145,15 @@ if (avail.length >= want) {
 startDraw(avail, want);
 return;
 }
-/* 近 7 天剩下的不够本次抽取数量，让用户选 */
+/* 近 7 天剩下的不够本次抽取数量，让用户选（必查项照常全出） */
 pendingAvail = avail;
 var restBtn = document.getElementById("drawRestBtn");
 if (avail.length > 0) {
-showMsg("近 7 天已经抽过 " + (pool.length - avail.length) + " 项，清单里只剩 " + avail.length + " 项没抽过，不够这次要抽的 " + want + " 项。可以只抽剩下的 " + avail.length + " 项，或者清空本周记录、从整份清单重新开始。");
+showMsg("随机部分近 7 天已经抽过 " + (pool.length - avail.length) + " 项，只剩 " + avail.length + " 项没抽过，不够这次要抽的 " + want + " 项。可以只抽剩下的 " + avail.length + " 项，或者清空本周记录、从整份随机清单重新开始。每日必查的 " + fixedNames.length + " 项两种选法都会照常全出。");
 restBtn.style.display = "";
 restBtn.textContent = "只抽剩下的 " + avail.length + " 项";
 } else {
-showMsg("清单里的 " + pool.length + " 项近 7 天都已经抽过了。清空本周记录后就能重新开始抽。");
+showMsg("随机清单里的 " + pool.length + " 项近 7 天都已经抽过了。清空本周记录后随机部分就能重新开始抽；每日必查项不受影响。");
 restBtn.style.display = "none";
 }
 document.getElementById("shortActions").style.display = "";
@@ -958,9 +1166,13 @@ startDraw(pendingAvail, pendingAvail.length);
 document.getElementById("restartWeekBtn").addEventListener("click", function () {
 clearWeekHistory();
 showMsg("");
-var pool = parseList();
+var pool = randomPool();
 var want = clampCount();
-if (pool.length === 0) return;
+if (pool.length === 0) {
+startDraw([], 0);
+showToast("已清空本周记录，开始新一轮抽取");
+return;
+}
 if (want > pool.length) want = pool.length;
 startDraw(pool, want);
 showToast("已清空本周记录，开始新一轮抽取");
@@ -991,7 +1203,18 @@ return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) +
 
 function renderResults() {
 resultList.innerHTML = "";
+var fixedTotal = drawn.filter(function (it) { return it.kind === "fixed";}).length;
+var randomTotal = drawn.length - fixedTotal;
+var showGroups = fixedTotal > 0;
+var lastKind = null;
 drawn.forEach(function (item, idx) {
+if (showGroups && item.kind !== lastKind) {
+lastKind = item.kind;
+var gh = document.createElement("li");
+gh.className = "group-head";
+gh.textContent = item.kind === "fixed"? ("每日必查 · 共 " + fixedTotal + " 项（每天都查）"): ("随机抽查 · 共 " + randomTotal + " 项");
+resultList.appendChild(gh);
+}
 var li = document.createElement("li");
 
 var top = document.createElement("div");
@@ -1001,9 +1224,19 @@ var idxEl = document.createElement("span");
 idxEl.className = "item-idx";
 idxEl.textContent = idx + 1;
 
+var nameWrap = document.createElement("div");
+nameWrap.className = "item-name-wrap";
 var nameEl = document.createElement("span");
 nameEl.className = "item-name";
 nameEl.textContent = item.name;
+nameWrap.appendChild(nameEl);
+if (showGroups) {
+nameWrap.appendChild(document.createElement("br"));
+var tag = document.createElement("span");
+tag.className = "item-tag " + (item.kind === "fixed"? "tag-fixed": "tag-random");
+tag.textContent = item.kind === "fixed"? "每日必查": "随机抽查";
+nameWrap.appendChild(tag);
+}
 
 var seg = document.createElement("div");
 seg.className = "seg";
@@ -1038,7 +1271,7 @@ seg.appendChild(okBtn);
 seg.appendChild(badBtn);
 
 top.appendChild(idxEl);
-top.appendChild(nameEl);
+top.appendChild(nameWrap);
 top.appendChild(seg);
 li.appendChild(top);
 
@@ -1064,11 +1297,29 @@ renderSummary();
 
 function renderSummary() {
 var ok = 0, bad = 0;
+var fTotal = 0, rTotal = 0, fOk = 0, fBad = 0, rOk = 0, rBad = 0;
 drawn.forEach(function (it) {
 if (it.status === "ok") ok++;
 else if (it.status === "bad") bad++;
+if (it.kind === "fixed") {
+fTotal++;
+if (it.status === "ok") fOk++; else if (it.status === "bad") fBad++;
+} else {
+rTotal++;
+if (it.status === "ok") rOk++; else if (it.status === "bad") rBad++;
+}
 });
 var unmarked = drawn.length - ok - bad;
+var bd = document.getElementById("summaryBreakdown");
+if (bd) {
+if (fTotal > 0) {
+bd.textContent = "今日共查 " + drawn.length + " 项 = 必查 " + fTotal + " 项 + 随机 " + rTotal + " 项（必查：正常 " + fOk + " / 异常 " + fBad + "；随机：正常 " + rOk + " / 异常 " + rBad + "）";
+bd.style.display = "";
+} else {
+bd.textContent = "";
+bd.style.display = "none";
+}
+}
 summaryLine.innerHTML = "";
 function part(cls, label, num) {
 var s = document.createElement("span");
@@ -1080,6 +1331,10 @@ s.appendChild(b);
 return s;
 }
 summaryLine.appendChild(part("", "共抽查", drawn.length + " 项"));
+if (fTotal > 0) {
+summaryLine.appendChild(part("", "必查", fTotal + " 项"));
+summaryLine.appendChild(part("", "随机", rTotal + " 项"));
+}
 summaryLine.appendChild(part("s-ok", "正常", ok + " 项"));
 summaryLine.appendChild(part("s-bad", "异常", bad + " 项"));
 summaryLine.appendChild(part("", "未标记", unmarked + " 项"));
@@ -1092,21 +1347,36 @@ renderResults();
 showToast("未标记的都已标为正常");
 });
 
-/* 复制结果 */
+/* 复制结果：有必查时分【每日必查】【随机抽查】两段输出 */
 document.getElementById("copyBtn").addEventListener("click", function () {
 if (drawn.length === 0) return;
 var ok = 0, bad = 0, un = 0;
+var fixedItems = drawn.filter(function (it) { return it.kind === "fixed";});
+var randomItems = drawn.filter(function (it) { return it.kind !== "fixed";});
+drawn.forEach(function (it) {
+if (it.status === "ok") ok++; else if (it.status === "bad") bad++; else un++;
+});
+function fmtItem(it, i) {
+var st = it.status === "ok"? "正常": it.status === "bad"? "异常": "未标记";
+var line = (i + 1) + ". " + it.name + " —— " + st;
+if (it.note && it.note.trim()) line += "（" + it.note.trim() + "）";
+return line;
+}
 var lines = [];
 lines.push("");
 lines.push("抽查时间：" + fmtTime(drawnAt || new Date()));
+if (fixedItems.length > 0) {
+lines.push("今日共查 " + drawn.length + " 项 = 每日必查 " + fixedItems.length + " 项 + 随机抽查 " + randomItems.length + " 项");
+lines.push("");
+lines.push("【每日必查】");
+fixedItems.forEach(function (it, i) { lines.push(fmtItem(it, i));});
+lines.push("");
+lines.push("【随机抽查】");
+randomItems.forEach(function (it, i) { lines.push(fmtItem(it, i));});
+} else {
 lines.push("本次共抽查 " + drawn.length + " 项：");
-drawn.forEach(function (it, i) {
-var st = it.status === "ok"? "正常": it.status === "bad"? "异常": "未标记";
-if (it.status === "ok") ok++; else if (it.status === "bad") bad++; else un++;
-var line = (i + 1) + ". " + it.name + " —— " + st;
-if (it.note && it.note.trim()) line += "（" + it.note.trim() + "）";
-lines.push(line);
-});
+drawn.forEach(function (it, i) { lines.push(fmtItem(it, i));});
+}
 lines.push("汇总：正常 " + ok + " 项，异常 " + bad + " 项，未标记 " + un + " 项");
 var text = lines.join("\n");
 
@@ -1130,6 +1400,7 @@ fallback();
 });
 
 updateCount();
+updateFixedCount();
 renderHistory();
 })();
 </script>
